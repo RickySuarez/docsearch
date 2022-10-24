@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 class FileHelpers {
     static List<File> getFiles(Path start) throws IOException {
@@ -36,6 +37,30 @@ class Handler implements URLHandler {
       this.files = FileHelpers.getFiles(Paths.get(directory));
     }
     public String handleRequest(URI url) throws IOException {
+        if(url.getPath().equals("/")){
+            return "There are " + files.size() + " files to search.";
+        }
+        else if(url.getPath().contains("/search")){
+            String[] str = url.getQuery().split("=");
+            int counter = 0;
+            String s = "";
+            if(str[0].equals("q")){
+                for(int i = 0; i < files.size(); i++){
+                    boolean flag = false;
+                    Scanner file = new Scanner(files.get(i));
+                    while(file.hasNext() && !flag){
+                        if(file.next().contains(str[1])){
+                            flag = true;
+                            counter++;
+                            s += files.get(i).getPath() + ", ";
+                        }
+                    }
+                }
+            }
+            else return "Don't know how to handle that path!";
+            if(s.length() == 0) return "There were 0 files found.";
+            return String.format("There were %d files found:\n%s", counter, s.substring(0, s.length() - 2));
+        }
       return "Don't know how to handle that path!";
     }
 }
